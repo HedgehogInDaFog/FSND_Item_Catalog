@@ -1,0 +1,30 @@
+<html>
+<head>
+	<link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
+	</head>
+<body>
+
+<h1>New Book Item</h1>
+
+<div class = 'pane'>
+<form action="{{ url_for('newBookItem', category_id=category_id )}}" method = 'post'>
+
+<dl>
+	<dt>Name:</dt>
+		<dd><input type ='text' size='30' name='name' required></dd>
+            <dt>Description:</dt>
+                        <dd><textarea name = 'description' rows='5' cols='40' required></textarea></dd>
+            <dt>Year:</dt>
+                        <dd><input type = 'text' size = '8' name='year' required></dd>
+            <dt>Author:</dt>
+                        <dd><input type = 'text' size = '25' name='author' required></dd>
+</dl>
+
+<input type='submit' value='Create'>
+
+</form>
+</div>
+
+</body>
+
+</html>
