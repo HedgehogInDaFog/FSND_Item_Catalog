@@ -27,11 +27,13 @@
       <p>{{i.description}}</p>
       <p> {{i.year}} </p>
       <p> {{i.author}} </p>
+      <p> Creator: {{i.user_id}} </p>
     </div>
         <a href= {{ url_for('editBookItem', category_id=category.id, book_id=i.id) }}>Edit</a>
     <br>
     <a href= {{ url_for('deleteBookItem', category_id=category.id, book_id=i.id) }}>Delete</a>
     <hr>
+    <p>==============================================</p> 
 
 
 

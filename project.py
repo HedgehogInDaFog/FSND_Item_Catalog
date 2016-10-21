@@ -65,7 +65,7 @@ def showCategories():
 
 
 @app.route('/categories/<int:category_id>/')
-def categoryBook(category_id):
+def categoryBooks(category_id):
     category = session.query(Category).filter_by(id=category_id).one()
     creator = getUserInfo(category.user_id)
     items = session.query(BookItem).filter_by(category_id=category.id)
@@ -77,7 +77,7 @@ def categoryBook(category_id):
 
 
 @app.route('/categories/<int:category_id>/book/JSON')
-def categoryBookJSON(category_id):
+def categoryBooksJSON(category_id):
     items = session.query(BookItem).filter_by(
         category_id=category_id).all()
     return jsonify(BookItems=[i.serialize for i in items])
@@ -115,11 +115,11 @@ def newBookItem(category_id):
                            year=request.form['year'],
                            author=request.form['author'],
                            category_id=category_id,
-                           user_id=category.user_id)
+                           user_id=login_session['user_id'])
         session.add(newItem)
         session.commit()
         flash("new book item created!")
-        return redirect(url_for('categoryBook', category_id=category_id))
+        return redirect(url_for('categoryBooks', category_id=category_id))
     else:
         return render_template('newbookitem.html', category_id=category_id)
 
@@ -130,6 +130,8 @@ def editBookItem(category_id, book_id):
         return redirect('/login')
     category = session.query(Category).filter_by(id=category_id).one()
     item = session.query(BookItem).filter_by(category_id=category.id, id=book_id).one()
+    if item.user_id != login_session['user_id']:
+        return "You are not Authorized!"
     if request.method == 'POST':
         if request.form['name']:
             item.name = request.form['name']
@@ -141,7 +143,7 @@ def editBookItem(category_id, book_id):
             item.author = request.form['author']
         session.commit()
         flash("book item edited!")
-        return redirect(url_for('categoryBook', category_id=category_id))
+        return redirect(url_for('categoryBooks', category_id=category_id))
     else:
         return render_template('editbookitem.html', category_id=category_id, book_id=book_id, item=item)
 
@@ -151,14 +153,15 @@ def deleteBookItem(category_id, book_id):
     if 'username' not in login_session:
         return redirect('/login')
     category = session.query(Category).filter_by(id=category_id).one()
-    if category.user_id != login_session['user_id']:
+    book = session.query(BookItem).filter_by(id=book_id).one()
+    if book.user_id != login_session['user_id']:
         return "You are not Authorized!"
     item = session.query(BookItem).filter_by(category_id=category.id, id=book_id).one()
     if request.method == 'POST':
         session.delete(item)
         session.commit()
         flash("book item deleted!")
-        return redirect(url_for('categoryBook', category_id=category_id))
+        return redirect(url_for('categoryBooks', category_id=category_id))
     else:
         return render_template('deletebookitem.html', item=item)
 

@@ -25,7 +25,7 @@
       <h3>{{i.name}}</h3>
     </div>
 
-    <a href= {{ url_for('categoryBook', category_id=i.id) }}>Go to books</a>
+    <a href= {{ url_for('categoryBooks', category_id=i.id) }}>Go to books</a>
     <hr>
 
     {% endfor %}
