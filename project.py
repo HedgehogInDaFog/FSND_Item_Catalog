@@ -85,7 +85,7 @@ def categoryBooksJSON(category_id):
     return jsonify(BookItems=[i.serialize for i in items])
 
 
-@app.route('/categories/<int:category_id>/book/<int:book_id>/JSON')
+@app.route('/categories/<int:category_id>/<int:book_id>/JSON')
 def bookItemJSON(category_id, book_id):
     bookItem = session.query(BookItem).filter_by(id=book_id).one()
     return jsonify(BookItem=bookItem.serialize)
@@ -255,9 +255,15 @@ def gconnect():
     return output
 
 
+@app.route('/clearSession')
+def clearSession():
+    login_session.clear()
+    return "Session cleared"
+
+
 @app.route('/gdisconnect')
 def gdisconnect():
-
+    
     access_token = login_session.get('credentials') #.access_token #['access_token']
 
     print('In gdisconnect access token is %s' % access_token)
@@ -265,7 +271,7 @@ def gdisconnect():
     print login_session['username']
     if access_token is None:
         print 'Access Token is None'
-        response = make_response(json.dumps('Current user not connected.'), 401)
+        response = make_response(json.dumps('Current user is not connected.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
     url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
