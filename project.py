@@ -85,7 +85,7 @@ def categoryBooksJSON(category_id):
     return jsonify(BookItems=[i.serialize for i in items])
 
 
-@app.route('/categories/<int:category_id>/book/JSON')
+@app.route('/categories/<int:category_id>/book/<int:book_id>/JSON')
 def bookItemJSON(category_id, book_id):
     bookItem = session.query(BookItem).filter_by(id=book_id).one()
     return jsonify(BookItem=bookItem.serialize)
