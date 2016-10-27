@@ -1,0 +1,31 @@
+{% extends "base.html"%}
+
+{% block content %}
+  <h1>{{category.name}}</h1>
+
+  <a href= {{ url_for('newBookItem', category_id=category.id) }}>Create new item</a>
+  <a href= {{ url_for('showCategories')}}>Go to main page</a>
+  <hr>
+
+  {% for i in items %}
+
+    <div>
+      <h3>{{i.name}}</h3>
+      <p> Author: {{i.author}} </p>
+      <p> Year: {{i.year}} </p>
+      <p>{{i.description}}</p>
+    </div>
+
+    {% if current_user_id == i.user_id %}
+
+      <a href= {{ url_for('editBookItem', category_id=category.id, book_id=i.id) }}>Edit</a>
+      <br>
+      <a href= {{ url_for('deleteBookItem', category_id=category.id, book_id=i.id) }}>Delete</a>
+
+    {% endif %}
+
+    <hr>
+
+  {% endfor %}
+
+{% endblock %}

@@ -1,9 +1,6 @@
-<html>
-<head>
-	<link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
-	</head>
-<body>
+{% extends "base.html"%}
 
+{% block content %}
 <h1>New Book Item</h1>
 
 <div class = 'pane'>
@@ -21,10 +18,6 @@
 </dl>
 
 <input type='submit' value='Create'>
+<a href = "{{url_for('categoryBooks', category_id = category_id)}}"> Cancel </a>
 
-</form>
-</div>
-
-</body>
-
-</html>
+{% endblock %}

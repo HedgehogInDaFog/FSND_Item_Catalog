@@ -59,24 +59,26 @@ def getUserID(email):
 def showCategories():
     categories = session.query(Category)
     if 'username' not in login_session:
-        return render_template('publiccategories.html', categories=categories)
+        login_str = "You are not logged in"
     else:
-        return render_template('categories.html', categories=categories)
+        login_str = "You logged in as %s" % login_session['username']
+    return render_template('categories.html', categories=categories, login_str=login_str)
 
 
 @app.route('/categories/<int:category_id>/')
 def categoryBooks(category_id):
     category = session.query(Category).filter_by(id=category_id).one()
-    creator = getUserInfo(category.user_id)
     items = session.query(BookItem).filter_by(category_id=category.id)
-
-    if 'username' not in login_session or creator.id != login_session['user_id']:
-        return render_template('publicbook.html', category=category, items=items, creator=creator)
+    if 'username' not in login_session:
+        login_str = "You are not logged in"
+        current_user_id = 0
     else:
-        return render_template('book.html', category=category, items=items,  creator=creator)
+        login_str = "You logged in as %s" % login_session['username']
+        current_user_id = login_session['user_id']
+    return render_template('books.html', category=category, items=items, login_str=login_str, current_user_id=current_user_id)
 
 
-@app.route('/categories/<int:category_id>/book/JSON')
+@app.route('/categories/<int:category_id>/JSON')
 def categoryBooksJSON(category_id):
     items = session.query(BookItem).filter_by(
         category_id=category_id).all()
@@ -89,25 +91,12 @@ def bookItemJSON(category_id, book_id):
     return jsonify(BookItem=bookItem.serialize)
 
 
-@app.route('/category/new/', methods=['GET', 'POST'])
-def newCategory():
-    if 'username' not in login_session:
-        return redirect('/login')
-    if request.method == 'POST':
-        newCategory = Category(
-            name=request.form['name'], user_id=login_session['user_id'])
-        session.add(newCategory)
-        flash('New Category %s Successfully Created' % newCategory.name)
-        session.commit()
-        return redirect(url_for('showCategories'))
-    else:
-        return render_template('newCategory.html')
-
-
 @app.route('/category/<int:category_id>/new/', methods=['GET', 'POST'])
 def newBookItem(category_id):
     if 'username' not in login_session:
         return redirect('/login')
+    else:
+        login_str = "You logged in as %s" % login_session['username']
     category = session.query(Category).filter_by(id=category_id).one()
     if request.method == 'POST':
         newItem = BookItem(name=request.form['name'],
@@ -119,15 +108,17 @@ def newBookItem(category_id):
         session.add(newItem)
         session.commit()
         flash("new book item created!")
-        return redirect(url_for('categoryBooks', category_id=category_id))
+        return redirect(url_for('categoryBooks', category_id=category_id, login_str=login_str))
     else:
-        return render_template('newbookitem.html', category_id=category_id)
+        return render_template('newbookitem.html', category_id=category_id, login_str=login_str)
 
 
 @app.route('/category/<int:category_id>/<int:book_id>/edit/', methods=['GET', 'POST'])
 def editBookItem(category_id, book_id):
     if 'username' not in login_session:
         return redirect('/login')
+    else:
+        login_str = "You logged in as %s" % login_session['username']
     category = session.query(Category).filter_by(id=category_id).one()
     item = session.query(BookItem).filter_by(category_id=category.id, id=book_id).one()
     if item.user_id != login_session['user_id']:
@@ -143,15 +134,17 @@ def editBookItem(category_id, book_id):
             item.author = request.form['author']
         session.commit()
         flash("book item edited!")
-        return redirect(url_for('categoryBooks', category_id=category_id))
+        return redirect(url_for('categoryBooks', category_id=category_id, login_str=login_str))
     else:
-        return render_template('editbookitem.html', category_id=category_id, book_id=book_id, item=item)
+        return render_template('editbookitem.html', category_id=category_id, book_id=book_id, item=item, login_str=login_str)
 
 
 @app.route('/category/<int:category_id>/<int:book_id>/delete/', methods=['GET', 'POST'])
 def deleteBookItem(category_id, book_id):
     if 'username' not in login_session:
         return redirect('/login')
+    else:
+        login_str = "You logged in as %s" % login_session['username']
     category = session.query(Category).filter_by(id=category_id).one()
     book = session.query(BookItem).filter_by(id=book_id).one()
     if book.user_id != login_session['user_id']:
@@ -161,9 +154,9 @@ def deleteBookItem(category_id, book_id):
         session.delete(item)
         session.commit()
         flash("book item deleted!")
-        return redirect(url_for('categoryBooks', category_id=category_id))
+        return redirect(url_for('categoryBooks', category_id=category_id, login_str=login_str))
     else:
-        return render_template('deletebookitem.html', item=item)
+        return render_template('deletebookitem.html', item=item, login_str=login_str)
 
 
 @app.route('/login')
