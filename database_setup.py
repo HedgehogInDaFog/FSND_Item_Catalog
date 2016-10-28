@@ -7,6 +7,7 @@ Base = declarative_base()
 
 
 class User(Base):
+    # Table contains registered users
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
@@ -26,7 +27,10 @@ class User(Base):
 
 
 class Category(Base):
+    # Table contains possible categories for books (for example: fiction,
+    # biographies, science, etc)
     __tablename__ = 'category'
+
     name = Column(String(80), nullable=False)
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id'))
@@ -44,6 +48,7 @@ class Category(Base):
 
 
 class BookItem(Base):
+    # Table contains information about books
     __tablename__ = 'book_item'
 
     name = Column(String(80), nullable=False)

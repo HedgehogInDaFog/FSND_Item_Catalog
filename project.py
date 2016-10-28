@@ -1,22 +1,18 @@
-# id = 718036307480-s9kjb30rc4ltodh5bvsgikletiqc4mm2.apps.googleusercontent.com
-# client_secret zhLjG8JUcOUCejpzpUfnL-QZ
-
-from flask import Flask, flash, jsonify, redirect
-from flask import render_template, url_for, request
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from database_setup import Base, Category, BookItem, User
-
-from flask import session as login_session
-from random import choice as rand_choice
-from string import ascii_uppercase, digits
-
-from oauth2client.client import flow_from_clientsecrets
-from oauth2client.client import FlowExchangeError
 import httplib2
 import json
-from flask import make_response
+from random import choice as rand_choice
+from string import ascii_uppercase, digits
 import requests
+
+from flask import Flask, jsonify, make_response, redirect
+from flask import render_template, url_for, request
+from flask import session as login_session
+from oauth2client.client import flow_from_clientsecrets
+from oauth2client.client import FlowExchangeError
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from database_setup import Base, Category, BookItem, User
 
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
@@ -57,14 +53,15 @@ def getUserID(email):
 @app.route('/')
 @app.route('/category/')
 @app.route('/categories/')
+# Main page
 def showCategories():
     categories = session.query(Category)
     if 'username' not in login_session:
         login_str = "You are not logged in"
-        show_login = True
+        show_login = True  # Show login button
     else:
         login_str = "You logged in as %s" % login_session['username']
-        show_login = False
+        show_login = False  # Show logout button
     return render_template('categories.html',
                            categories=categories,
                            login_str=login_str,
@@ -72,8 +69,11 @@ def showCategories():
 
 
 @app.route('/categories/<int:category_id>/')
+# Show all books from the category
 def categoryBooks(category_id):
+    # get category of books:
     category = session.query(Category).filter_by(id=category_id).one()
+    # get all books from current category:
     items = session.query(BookItem).filter_by(category_id=category.id)
     if 'username' not in login_session:
         login_str = "You are not logged in"
@@ -91,20 +91,8 @@ def categoryBooks(category_id):
                            show_login=show_login)
 
 
-@app.route('/categories/<int:category_id>/JSON')
-def categoryBooksJSON(category_id):
-    items = session.query(BookItem).filter_by(
-        category_id=category_id).all()
-    return jsonify(BookItems=[i.serialize for i in items])
-
-
-@app.route('/categories/<int:category_id>/<int:book_id>/JSON')
-def bookItemJSON(category_id, book_id):
-    bookItem = session.query(BookItem).filter_by(id=book_id).one()
-    return jsonify(BookItem=bookItem.serialize)
-
-
 @app.route('/category/<int:category_id>/new/', methods=['GET', 'POST'])
+# Create new book
 def newBookItem(category_id):
     if 'username' not in login_session:
         return redirect('/login')
@@ -119,7 +107,6 @@ def newBookItem(category_id):
                            user_id=login_session['user_id'])
         session.add(newItem)
         session.commit()
-        flash("new book item created!")
         return redirect(url_for('categoryBooks',
                                 category_id=category_id,
                                 login_str=login_str))
@@ -131,6 +118,7 @@ def newBookItem(category_id):
 
 @app.route('/category/<int:category_id>/<int:book_id>/edit/',
            methods=['GET', 'POST'])
+# Edit book
 def editBookItem(category_id, book_id):
     if 'username' not in login_session:
         return redirect('/login')
@@ -151,7 +139,6 @@ def editBookItem(category_id, book_id):
         if request.form['author']:
             item.author = request.form['author']
         session.commit()
-        flash("book item edited!")
         return redirect(url_for('categoryBooks',
                                 category_id=category_id,
                                 login_str=login_str))
@@ -165,6 +152,7 @@ def editBookItem(category_id, book_id):
 
 @app.route('/category/<int:category_id>/<int:book_id>/delete/',
            methods=['GET', 'POST'])
+# Delete book
 def deleteBookItem(category_id, book_id):
     if 'username' not in login_session:
         return redirect('/login')
@@ -179,7 +167,6 @@ def deleteBookItem(category_id, book_id):
     if request.method == 'POST':
         session.delete(item)
         session.commit()
-        flash("book item deleted!")
         return redirect(url_for('categoryBooks',
                                 category_id=category_id,
                                 login_str=login_str))
@@ -281,8 +268,6 @@ def gconnect():
     output += login_session['picture']
     output += ' " style = "width: 300px; height: 300px;border-radius: 150px;'
     output += ' -webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
-    flash("you are now logged in as %s" % login_session['username'])
-    print("done!")
     return output
 
 
@@ -318,6 +303,20 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
 
+
+@app.route('/categories/<int:category_id>/JSON')
+# Provide data in JSON format
+def categoryBooksJSON(category_id):
+    items = session.query(BookItem).filter_by(
+        category_id=category_id).all()
+    return jsonify(BookItems=[i.serialize for i in items])
+
+
+@app.route('/categories/<int:category_id>/<int:book_id>/JSON')
+# Provide data in JSON format
+def bookItemJSON(category_id, book_id):
+    bookItem = session.query(BookItem).filter_by(id=book_id).one()
+    return jsonify(BookItem=bookItem.serialize)
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
