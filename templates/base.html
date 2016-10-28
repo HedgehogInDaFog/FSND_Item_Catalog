@@ -6,6 +6,11 @@
   <body>
     <div class="narrow-cont">
         <p>{{ login_str}}</p>
+        {% if show_login == True %}
+        <a href= {{ url_for('showLogin')}}>Login</a>
+        {% else %}
+        <a href= {{ url_for('gdisconnect')}}>Logout</a>
+        {% endif %}
        {% block content %}{% endblock %}
     </div>
   </body>

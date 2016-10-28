@@ -61,11 +61,14 @@ def showCategories():
     categories = session.query(Category)
     if 'username' not in login_session:
         login_str = "You are not logged in"
+        show_login = True
     else:
         login_str = "You logged in as %s" % login_session['username']
+        show_login = False
     return render_template('categories.html',
                            categories=categories,
-                           login_str=login_str)
+                           login_str=login_str,
+                           show_login=show_login)
 
 
 @app.route('/categories/<int:category_id>/')
@@ -75,14 +78,17 @@ def categoryBooks(category_id):
     if 'username' not in login_session:
         login_str = "You are not logged in"
         current_user_id = 0
+        show_login = True
     else:
         login_str = "You logged in as %s" % login_session['username']
         current_user_id = login_session['user_id']
+        show_login = False
     return render_template('books.html',
                            category=category,
                            items=items,
                            login_str=login_str,
-                           current_user_id=current_user_id)
+                           current_user_id=current_user_id,
+                           show_login=show_login)
 
 
 @app.route('/categories/<int:category_id>/JSON')
@@ -286,7 +292,7 @@ def clearSession():
     return "Session cleared"
 
 
-@app.route('/gdisconnect')
+@app.route('/logout')
 def gdisconnect():
 
     access_token = login_session.get('credentials')

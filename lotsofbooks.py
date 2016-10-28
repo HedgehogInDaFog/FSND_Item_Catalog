@@ -9,13 +9,7 @@ engine = create_engine('sqlite:///categorybookwithusers.db')
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
-# A DBSession() instance establishes all conversations with the database
-# and represents a "staging zone" for all the objects loaded into the
-# database session object. Any change made against the objects in the
-# session won't be persisted into the database until you call
-# session.commit(). If you're not happy about the changes, you can
-# revert all of them back to the last commit by calling
-# session.rollback()
+
 session = DBSession()
 
 
@@ -24,6 +18,8 @@ User1 = User(name="Test User", email="testmail@gmail.com",
              picture='https://lh3.googleusercontent.com/-YSAuXnt9FRA/TviaoLUmxII/AAAAAAAAACU/ggL9qoOvsiMDBNG3r3wO6N_DqFJs6203wCEw/w140-h139-p/Photo%2B275.jpg')
 session.add(User1)
 session.commit()
+
+# Add some random books and categories from Amazon
 
 category1 = Category(user_id=1, name="Biographies")
 session.add(category1)
@@ -54,6 +50,27 @@ session.commit()
 category1 = Category(user_id=1, name="Business & Money")
 session.add(category1)
 session.commit()
+
+bookItem1 = BookItem(user_id=1,
+                     name="The Millionaire Next Door",
+                     description="Most of the truly wealthy in the United States do not live in Beverly Hills or on Park Avenue. They live next door",
+                     year="2010",
+                     author="Thomas J. Stanley Ph.D.",
+                     category=category1)
+
+session.add(bookItem1)
+session.commit()
+
+bookItem2 = BookItem(user_id=1,
+                     name="The Power of Habit: Why We Do What We Do in Life and Business",
+                     description="A young woman walks into a laboratory. Over the past two years, she has transformed almost every aspect of her life. She has quit smoking, run a marathon, and been promoted at work. The patterns inside her brain, neurologists discover, have fundamentally changed.",
+                     year="2012",
+                     author="Charles Duhigg",
+                     category=category1)
+
+session.add(bookItem2)
+session.commit()
+
 category1 = Category(user_id=1, name="Children's Books")
 session.add(category1)
 session.commit()
@@ -106,6 +123,4 @@ category1 = Category(user_id=1, name="Travel")
 session.add(category1)
 session.commit()
 
-
-
-print "added book items!"
+print("added book items!")
